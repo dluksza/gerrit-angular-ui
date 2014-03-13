@@ -58,10 +58,13 @@ Gerrit.install(function(self) {
 
   // dynamically inject all CSS into page head
   for (dep in cssDeps) {
-    var link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = self.url('/static/' + cssDeps[dep]);
-    head.appendChild(link);
+    if (window['_angularGerritLoadedDeps'].indexOf(dependency) === -1) {
+      window['_angularGerritLoadedDeps'].push(dependency);
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = self.url('/static/' + cssDeps[dep]);
+      head.appendChild(link);
+    }
   }
   // dynamically inject all JS into page head
   for (dep in jsDeps) {
