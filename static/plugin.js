@@ -1,6 +1,4 @@
-AngularGerrit.install(function(pluginName, moduleName) {
-var app = angular.module(pluginName, [moduleName]);
-
+AngularGerrit.install([], function(app) {
 app.config(['GerritRouteProvider', function(GerritRouteProvider) {
   GerritRouteProvider
     .when('q/:query?', {controller: 'QueryCtrl',
@@ -95,8 +93,4 @@ app.controller('QueryCtrl', function($scope, $routeParams, $filter, GerritSrv, G
   $scope.query = query;
   $scope.active = changes[0] || {};
   $scope.changes = changes;
-})
-
-AngularGerrit.bootstrap(pluginName);
-return app;
-})
+})})

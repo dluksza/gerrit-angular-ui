@@ -289,15 +289,6 @@ var _initAngularGerrit = function(self) {
   self.refresh();
 }
 
-var _install = function(pluginCallback) {
-  var pluginName = Gerrit.getPluginName();
-  var moduleName = _getModuleName(pluginName);
-  _installStarted.push(pluginName);
-   setTimeout(function() {
-    pluginCallback(pluginName, moduleName);
-  }, 50);
-};
-
 var _bootstrap = function(moduleName) {
   _installFinished.push(moduleName);
   if (_installStarted.sort().toString() == _installFinished.sort().toString()) {
@@ -309,7 +300,21 @@ var _bootstrap = function(moduleName) {
     ngView.setAttribute('ng-view', '');
     gerritBody.appendChild(ngView);
     angular.bootstrap(document, _installFinished);
+    // clean up root scope after full initialization
+    delete window['_angularGerritLoadedDeps'];
   }
+};
+
+var _install = function(additionalModules, pluginCallback) {
+  var pluginName = Gerrit.getPluginName();
+  var moduleName = _getModuleName(pluginName);
+  _installStarted.push(pluginName);
+  setTimeout(function() {
+    additionalModules.push(moduleName);
+    var app = angular.module(pluginName, additionalModules);
+    pluginCallback(app);
+    _bootstrap(pluginName);
+  }, 1);
 };
 
 if (!window['AngularGerrit']) {
@@ -344,14 +349,11 @@ if (!window['AngularGerrit']) {
      * modify init.js and provide $plugin_dir/static/ relative paths
      * to those.
      *
-     * AngularGerrit.install(function(gerritPluginModuleName) {
-     *   var myApp = angular.module('myApp', [gerritPluginModuleName]);
+     * AngularGerrit.install([], function(app) {
      *   // ... plugin code
-     *   angular.bootstrap(document, ['myApp']);
      * });
      */
     install: _install,
-    bootstrap: _bootstrap,
   }
 }
 })();

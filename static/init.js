@@ -1,34 +1,37 @@
-/**
- * Url to actuall plugin JS file.
- *
- * URL need be relative to /plugins/$plugin_name/static/
- */
-var pluginFileUrl = 'plugin.js';
-
-/**
- * List of CSS dependencies
- *
- * Provided URLs needs be relative to /plugins/$plugin_name/static/
- */
-var cssDeps = ['dist/bootstrap-3.1.0.css',];
-
-/**
- * Additional JavaScript dependencies required by this plugin.
- * They will be automatically injected into document head section
- * during plugin starup.
- *
- * Provided URLs needs be relative to /plugins/$plugin_name/static/
- */
-var additionalJsDeps = [];
-
-var jqueryVersion = '1.10.2';
-var angularVersion = '1.2.9';
-
 Gerrit.install(function(self) {
+  /**
+   * Url to actuall plugin JS file.
+   *
+   * URL need be relative to /plugins/$plugin_name/static/
+   */
+  var pluginFileUrl = 'plugin.js';
+
+  /**
+   * List of CSS dependencies
+   *
+   * Provided URLs needs be relative to /plugins/$plugin_name/static/
+   */
+  var cssDeps = ['dist/bootstrap-3.1.0.css',];
+
+  /**
+   * Additional JavaScript dependencies required by this plugin.
+   * They will be automatically injected into document head section
+   * during plugin starup.
+   *
+   * Provided URLs needs be relative to /plugins/$plugin_name/static/
+   */
+  var additionalJsDeps = [];
+
+  var jqueryVersion = '1.10.2';
+  var angularVersion = '1.2.9';
+
+  /** INTERNALS **/
+  window['_angularGerritLoadedDeps'] = window['_angularGerritLoadedDeps'] || [];
+
   var jsDeps = ['dist/jquery-' + jqueryVersion + '.js',
                 'dist/angular-' + angularVersion + '.js',
                 'dist/angular-route-' + angularVersion + '.js',
-                'js/angular-gerrit.js',];
+                ];
   jsDeps = jsDeps.concat(additionalJsDeps);
   var head = document.getElementsByTagName('head')[0] || document.documentElement;
   var loadScript = function(name) {
@@ -48,13 +51,20 @@ Gerrit.install(function(self) {
   }
   // dynamically inject all JS into page head
   for (dep in jsDeps) {
-    loadScript(jsDeps[dep]);
+    var dependency = jsDeps[dep];
+    if (window['_angularGerritLoadedDeps'].indexOf(dependency) === -1) {
+      window['_angularGerritLoadedDeps'].push(dependency);
+      loadScript(dependency);
+    }
   }
+  // laod Angular Gerrit API
+  loadScript('js/angular-gerrit.js');
 
   var onAngularGerritLoad = function() {
     var angularGerrit = window['AngularGerrit'];
     if (angularGerrit && typeof(angularGerrit) == 'object') {
       angularGerrit.init(self);
+      // load main plugin file
       loadScript(pluginFileUrl);
     } else {
       waitForAngularGerrit();
