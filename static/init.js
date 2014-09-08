@@ -16,14 +16,14 @@ Gerrit.install(function(self) {
   /**
    * Url to actuall plugin JS file.
    *
-   * URL need be relative to /plugins/$plugin_name/static/
+   * URL needs to be relative to /plugins/$plugin_name/static/
    */
   var pluginFileUrl = 'plugin.js';
 
   /**
    * List of CSS dependencies
    *
-   * Provided URLs needs be relative to /plugins/$plugin_name/static/
+   * Provided URLs need be relative to /plugins/$plugin_name/static/
    */
   var cssDeps = ['dist/bootstrap-3.1.0.css',];
 
@@ -32,20 +32,19 @@ Gerrit.install(function(self) {
    * They will be automatically injected into document head section
    * during plugin starup.
    *
-   * Provided URLs needs be relative to /plugins/$plugin_name/static/
+   * Provided URLs need be relative to /plugins/$plugin_name/static/
    */
   var additionalJsDeps = [];
 
-  var jqueryVersion = '1.10.2';
-  var angularVersion = '1.2.9';
+  var jqueryVersion = '2.1.1';
+  var angularVersion = '1.2.23';
 
   /** INTERNALS **/
   window['_angularGerritLoadedDeps'] = window['_angularGerritLoadedDeps'] || [];
 
   var jsDeps = ['dist/jquery-' + jqueryVersion + '.js',
                 'dist/angular-' + angularVersion + '.js',
-                'dist/angular-route-' + angularVersion + '.js',
-                ];
+                'dist/angular-route-' + angularVersion + '.js',];
   jsDeps = jsDeps.concat(additionalJsDeps);
   var head = document.getElementsByTagName('head')[0] || document.documentElement;
   var loadScript = function(name) {
@@ -74,7 +73,7 @@ Gerrit.install(function(self) {
       loadScript(dependency);
     }
   }
-  // laod Angular Gerrit API
+  // load Angular Gerrit API
   loadScript('js/angular-gerrit.js');
 
   var onAngularGerritLoad = function() {
