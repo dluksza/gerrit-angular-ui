@@ -25,6 +25,7 @@ var _getModuleName = function(pluginName) {
 var _initAngularGerrit = function(self) {
   var _screenCtx;
   var _pluginName = self.getPluginName();
+  _availablePlugins.push(_pluginName);
   var _moduleName = _getModuleName(_pluginName);
   var _addjustUrl = function(url) {
     return (url.charAt(0)=='/' ? url.substring(1) : url);
@@ -303,9 +304,9 @@ var _initAngularGerrit = function(self) {
   self.refresh();
 }
 
-var _bootstrap = function(moduleName) {
-  _installFinished.push(moduleName);
-  if (_installStarted.sort().toString() == _installFinished.sort().toString()) {
+var _bootstrap = function(pluginName) {
+  _installedPlugins.push(pluginName);
+  if (_availablePlugins.sort().toString() == _installedPlugins.sort().toString()) {
     // angular needs a container with 'ng-view' property
     // to be able to show contents, therefore we create here
     // div conteiner within main gerrit node
@@ -313,7 +314,8 @@ var _bootstrap = function(moduleName) {
     var ngView = document.createElement('div');
     ngView.setAttribute('ng-view', '');
     gerritBody.appendChild(ngView);
-    angular.bootstrap(document, _installFinished);
+    // bootstrap Angular!
+    angular.bootstrap(document, _installedPlugins);
     // clean up root scope after full initialization
     delete window['_angularGerritLoadedDeps'];
   }
@@ -322,7 +324,8 @@ var _bootstrap = function(moduleName) {
 var _install = function(additionalModules, pluginCallback) {
   var pluginName = Gerrit.getPluginName();
   var moduleName = _getModuleName(pluginName);
-  _installStarted.push(pluginName);
+  // this could result in some raceconditions, but I didn't found better
+  // solution how to initialize multiple Angular modules dynamically
   setTimeout(function() {
     additionalModules.push(moduleName);
     var app = angular.module(pluginName, additionalModules);
@@ -332,8 +335,8 @@ var _install = function(additionalModules, pluginCallback) {
 };
 
 if (!window['AngularGerrit']) {
-  var _installStarted = [];
-  var _installFinished = [];
+  var _availablePlugins = [];
+  var _installedPlugins = [];
   window['AngularGerrit'] = {
     /**
      * Initializes all required Angular binding and generates
@@ -350,21 +353,22 @@ if (!window['AngularGerrit']) {
     /**
      * Install angular based plugin.
      *
-     * This method takes function of one argument as parameter.
+     * This method takes list of addtional Angualr modules and function
+     * with one parameter.
      *
      * Function passed as argument to this method will be later
-     * called with name of AngularGerrit module that must be inluded
-     * in Angular application dependiencies.
+     * called with plugin module instance.
      *
      * Each Gerrit plugin would have separate AngularGerrit module!
      *
      * When addtional JS (or CSS) dependiencies are required, they can
-     * be injected during initialization process. To do that, you need
-     * modify init.js and provide $plugin_dir/static/ relative paths
-     * to those.
+     * be injected during initialization process. This would require
+     * modifications in init.js file.
      *
      * AngularGerrit.install([], function(app) {
-     *   // ... plugin code
+     *   // example plugin code
+     *   app.config(['GerritRouteProvider', function(GerritRouteProvider) {}]);
+     *   app.controller('Ctrl', [function () {}]);
      * });
      */
     install: _install,
