@@ -1,0 +1,2 @@
+Gerrit-ApiType: js
+Gerrit-PluginName: gerrit-angular-ui
